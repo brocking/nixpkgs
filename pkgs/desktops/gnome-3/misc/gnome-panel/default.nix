@@ -34,6 +34,15 @@ in stdenv.mkDerivation rec {
     sha256 = "12q0l7wy6hzl46i7xpvv82ka3bn14z0jg6fhv5xhnk7j9mkbmgqw";
   };
 
+  patches = [
+    # https://github.com/NixOS/nixpkgs/issues/36468
+    # https://gitlab.gnome.org/GNOME/gnome-panel/issues/8
+    (fetchpatch {
+      url = https://gitlab.gnome.org/GNOME/gnome-panel/commit/77be9c3507bd1b5d70d97649b85ec9f47f6c359c.patch;
+      sha256 = "00b1ihnc6hp2g6x1v1njbc6mhsk44izl2wigviibmka2znfk03nv";
+    })
+  ];
+
   nativeBuildInputs = [
     autoreconfHook
     gettext
@@ -61,9 +70,6 @@ in stdenv.mkDerivation rec {
   configureFlags = [
     "--enable-eds"
   ];
-
-  # https://gitlab.gnome.org/GNOME/gnome-panel/issues/8
-  NIX_CFLAGS_COMPILE = "-I${glib.dev}/include/gio-unix-2.0";
 
   enableParallelBuilding = true;
 
