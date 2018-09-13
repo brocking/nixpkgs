@@ -1,7 +1,6 @@
 { stdenv
 , desktop-file-utils
 , fetchurl
-, fetchpatch
 , gettext
 , glib
 , gtk3
