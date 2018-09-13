@@ -1,6 +1,6 @@
 { stdenv, fetchurl, meson, ninja, pkgconfig, vala, gettext
 , libxml2, desktop-file-utils, wrapGAppsHook
-, glib, gtk3, libgtop, gnome3, fetchpatch }:
+, glib, gtk3, libgtop, gnome3 }:
 
 let
   pname = "gnome-usage";
@@ -16,9 +16,9 @@ in stdenv.mkDerivation rec {
   patches = [
     # Fails to build with vala-0.42
     # upstream issue and fix: https://gitlab.gnome.org/GNOME/gnome-usage/issues/46
-    (fetchpatch {
+    (fetchurl {
       url = https://gitlab.gnome.org/GNOME/gnome-usage/uploads/fec685e39a06f1c90f207415a0964e56/0001-Fix-build-with-vala-0.42.patch;
-      sha256 = "0fzqb6v8ngb62mcrq3fxhq24yx9p9wkgjxn7y5bbhg5z6gn0v24d";
+      sha256 = "0d7cak480xfkgndhykhjk3zlk1mk152sgg53vsm4lpvg73l8vzlz";
     })
   ];
 
