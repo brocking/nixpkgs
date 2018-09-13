@@ -1,6 +1,7 @@
 { stdenv
 , autoreconfHook
 , fetchurl
+, fetchpatch
 , gettext
 , glib
 , gnome-bluetooth
@@ -39,6 +40,13 @@ in stdenv.mkDerivation rec {
       inherit metacity;
       gnomeSession = gnome-session;
     })
+
+    # overrides do not respect gsettingsschemasdir
+    # https://gitlab.gnome.org/GNOME/gnome-flashback/issues/9
+    (fetchpatch {
+     url = https://gitlab.gnome.org/GNOME/gnome-flashback/commit/a55530f58ccd600414a5420b287868ab7d219705.patch;
+     sha256 = "1la94lhhb9zlw7bnbpl6hl26zv3kxbsvgx996mhph720wxg426mh";
+    })
   ];
 
   nativeBuildInputs = [
@@ -66,12 +74,6 @@ in stdenv.mkDerivation rec {
   doCheck = true;
 
   enableParallelBuilding = true;
-
-  installFlags = [
-    # overrides do not respect gsettingsschemasdir
-    # https://gitlab.gnome.org/GNOME/gnome-flashback/issues/9
-    "overridedir=${placeholder "out"}/share/gsettings-schemas/${name}/glib-2.0/schemas"
-  ];
 
   passthru = {
     updateScript = gnome3.updateScript {
