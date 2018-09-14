@@ -1,6 +1,6 @@
 --- a/tests/libtest.sh
 +++ b/tests/libtest.sh
-@@ -296,7 +296,7 @@ skip_without_bwrap () {
+@@ -296,7 +296,7 @@
          # running installed-tests: assume we know what we're doing
          :
      elif ! "$FLATPAK_BWRAP" --unshare-ipc --unshare-net --unshare-pid \
@@ -9,7 +9,7 @@
          sed -e 's/^/# /' < bwrap-result
          echo "1..0 # SKIP Cannot run bwrap"
          exit 0
-@@ -309,12 +309,12 @@ dbus-daemon --fork --config-file=session.conf --print-address=3 --print-pid=4 \
+@@ -309,12 +309,12 @@
  export DBUS_SESSION_BUS_ADDRESS="$(cat dbus-session-bus-address)"
  DBUS_SESSION_BUS_PID="$(cat dbus-session-bus-pid)"
  
@@ -26,7 +26,7 @@
      if test -n "${TEST_SKIP_CLEANUP:-}"; then
 --- a/tests/make-test-runtime.sh
 +++ b/tests/make-test-runtime.sh
-@@ -26,6 +26,7 @@ EOF
+@@ -26,6 +26,7 @@
  PATH="$PATH:/usr/sbin:/sbin"
  
  # Add bash and dependencies
@@ -34,10 +34,13 @@
  mkdir -p ${DIR}/usr/bin
  mkdir -p ${DIR}/usr/lib
  ln -s ../lib ${DIR}/usr/lib64
-@@ -38,37 +39,16 @@ fi
- LIBS=`mktemp`
- BINS=`mktemp`
- 
+@@ -35,48 +36,27 @@
+ else
+     cp `which ldconfig` ${DIR}/usr/bin
+ fi
+-LIBS=`mktemp`
+-BINS=`mktemp`
+-
 -add_bin() {
 -    local f=$1
 -    shift
@@ -81,6 +84,21 @@
  done
  ln -s bash ${DIR}/usr/bin/sh
  
+-# We copy the C.UTF8 locale and call it en_US. Its a bit of a lie, but
+-# the real en_US locale is often not available, because its in the
+-# local archive.
++mv ${DIR}/nix/store ${DIR}/usr/store # files outside /usr are not permitted, we will have to replace /nix/store with /usr/store
++chmod -R u+w ${DIR} # nix store has read-only directories which would cause problems during clean-up, files need to be writable for sed
++find ${DIR} -type f -print0 | xargs -0 sed -i 's~/nix/store/~/usr/store/~g' # replace hardcoded paths
++find ${DIR} -type l | xargs -I '{}' sh -c 'tg="$(readlink "$1")"; newtg="${tg#/nix/store/}"; if [ "$tg" != "$newtg" ]; then ln -fs "/usr/store/$newtg" "$1"; fi' -- '{}' # replace symlink targets
++
++# We copy the whole locale archive because we do not have C.UTF8 locale
+ mkdir -p ${DIR}/usr/lib/locale/
+-cp -r /usr/lib/locale/C.* ${DIR}/usr/lib/locale/en_US
++cp @glibcLocales@/lib/locale/locale-archive ${DIR}/usr/lib/locale/locale-archive
+ 
+ if [ x$COLLECTION_ID != x ]; then
+     collection_args=--collection-id=${COLLECTION_ID}
 --- a/tests/testlibrary.c
 +++ b/tests/testlibrary.c
 @@ -584,7 +584,7 @@

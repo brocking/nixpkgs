@@ -19,7 +19,7 @@ in stdenv.mkDerivation rec {
   patches = [
     (substituteAll {
       src = ./fix-test-paths.patch;
-      inherit coreutils python2 glibcLocales;
+      inherit coreutils glibcLocales;
       hicolorIconTheme = hicolor-icon-theme;
     })
     # patch taken from gtk_doc
